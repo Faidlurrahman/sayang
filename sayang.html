@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <title>Game Spesial Untuk Kamu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Ganti favicon dengan emoji love -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❤️</text></svg>">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+  <style>
+    body { font-family: 'Quicksand', sans-serif; background: #ffe6f0; margin: 0; }
+    .main-card { background: #fff0fa; border-radius: 18px; padding: 24px; margin: 24px auto; max-width: 400px; box-shadow: 0 2px 12px #f8b0d8; }
+    .game-board { display: grid; grid-template-columns: repeat(4, 50px); gap: 10px; justify-content: center; margin: 20px 0; }
+    .card { width: 50px; height: 50px; background: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 2em; cursor: pointer; box-shadow: 0 1px 4px #f8b0d8; transition: transform 0.2s; }
+    .card.flipped { background: #ffe6f0; animation: tada 0.5s; }
+    .card.matched { background: #e75480; color: #fff; animation: pop 0.5s; }
+    .hidden { visibility: hidden; }
+    .sweet { color: #e75480; font-weight: bold; text-align: center; margin: 20px 0 0 0; }
+    .tebak-kata { display: flex; flex-direction: column; align-items: center; margin-top: 20px; }
+    .tebak-kata input { padding: 8px; border-radius: 6px; border: 1px solid #f8b0d8; margin-bottom: 10px; width: 100%; max-width: 250px; }
+    .btn { background: #e75480; color: #fff; border: none; border-radius: 6px; padding: 8px 18px; cursor: pointer; font-size: 1em; }
+    .btn:active { background: #c43a5e; }
+    .slide-nav { display: flex; justify-content: space-between; margin-top: 18px; }
+    .slide-nav .btn { min-width: 110px; }
+    .emoji-bounce { display: inline-block; animation: emojiBounce 1.2s infinite; }
+    .emoji-spin { display: inline-block; animation: emojiSpin 1.2s infinite linear; }
+    .emoji-heartbeat { display: inline-block; animation: heartbeat 1.1s infinite; }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 #e75480aa; }
+      70% { box-shadow: 0 0 0 10px #e7548000; }
+      100% { box-shadow: 0 0 0 0 #e7548000; }
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0);}
+      50% { transform: translateY(-18px);}
+    }
+    @keyframes tada {
+      0% { transform: scale(1);}
+      10%, 20% { transform: scale(0.9) rotate(-3deg);}
+      30%, 50%, 70%, 90% { transform: scale(1.1) rotate(3deg);}
+      40%, 60%, 80% { transform: scale(1.1) rotate(-3deg);}
+      100% { transform: scale(1);}
+    }
+    @keyframes pop {
+      0% { transform: scale(1);}
+      50% { transform: scale(1.3);}
+      100% { transform: scale(1);}
+    }
+    @keyframes emojiBounce {
+      0%, 100% { transform: translateY(0);}
+      50% { transform: translateY(-18px);}
+    }
+    @keyframes emojiSpin {
+      0% { transform: rotate(0);}
+      100% { transform: rotate(360deg);}
+    }
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1);}
+      25% { transform: scale(1.2);}
+      50% { transform: scale(0.95);}
+      75% { transform: scale(1.15);}
+    }
+    /* Responsive */
+    @media (max-width: 600px) {
+      .main-card { padding: 12px; margin: 10px auto; max-width: 98vw; }
+      .game-board { grid-template-columns: repeat(4, 36px); gap: 7px; }
+      .card { width: 36px; height: 36px; font-size: 1.3em; }
+      .tebak-kata input { max-width: 98vw; }
+    }
+  </style>
+</head>
+<body>
+  <audio src="https://feeldreams.github.io/audio/foreveryoung.mp3" id="linkmp3" autoplay loop></audio>
+  <audio id="music1" src="music/20250715_203823.mp3"></audio>
+  <audio id="music2" src="music/Arctic Monkeys - I Wanna Be Yours (Instrumental).mp3"></audio>
+  <div class="swiper mySwiper">
+    <div class="swiper-wrapper">
+
+      <!-- Slide 1: Sambutan -->
+      <div class="swiper-slide">
+        <div class="main-card">
+          <h1 style="font-size: 22px;">Halo Nazwah Sayang! <span class="emoji-heartbeat">❤️</span></h1>
+          <p class="sweet">
+            Hari ini aku punya dua game seru buat kamu.<br>
+            Coba Main yaps, biar makin sayang sama aku! <span class="emoji-bounce">😘</span>
+          </p>
+          <div class="slide-nav" style="justify-content: flex-end;">
+            <button class="btn" id="nextAwal">Lanjut ➔</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 2: Memory Game -->
+      <div class="swiper-slide">
+        <div class="main-card">
+          <h2 style="font-size: 18px;">Memory Game Spesial <span class="emoji-spin">🧠</span></h2>
+          <p class="sweet">Cocokin emoji yang sama, yaa!<br>Biar makin kompak kayak kita <span class="emoji-bounce">😆</span></p>
+          <div class="game-board" id="memory-board"></div>
+          <div id="memory-message" class="sweet"></div>
+          <div class="slide-nav">
+            <button class="btn" id="prevMemory">⬅ Sebelumnya</button>
+            <button class="btn" id="nextMemory">Selanjutnya ➡</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 3: Tebak Kata 1 -->
+      <div class="swiper-slide">
+        <div class="main-card">
+          <h2 style="font-size: 18px;">Tebak Kata Cinta <span class="emoji-heartbeat">💌</span></h2>
+          <p class="sweet">Tebak kata yang suka aku kasi ke kamu! <span class="emoji-bounce">🥰</span></p>
+          <div class="tebak-kata">
+            <div id="kata-petunjuk" style="font-size:1.2em; margin-bottom:8px;"></div>
+            <input type="text" id="kata-jawaban" placeholder="Jawaban kamu di sini..." autocomplete="off" />
+            <button class="btn" onclick="cekJawaban()">Cek Jawaban</button>
+            <div id="kata-message" class="sweet"></div>
+          </div>
+          <div class="slide-nav">
+            <button class="btn" id="prevTebak1">⬅ Sebelumnya</button>
+            <button class="btn" id="nextTebak1">Selanjutnya ➡</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 4: Tebak Kata 2 (Kata yang Menggambarkan Nazwah) -->
+      <div class="swiper-slide">
+        <div class="main-card">
+          <h2 style="font-size: 18px;">Tebak Kata yang menurut aku Menggambarkan Kamu <span class="emoji-bounce">🦄</span></h2>
+          <p class="sweet">Isi 3 kata dibawah ya sayang! <span class="emoji-heartbeat">😍</span><br>
+          Jawab semuanya biar bisa lanjut yaa~</p>
+          <div class="tebak-kata">
+            <input type="text" id="kata-nazwah-1" placeholder="Kata pertama..." autocomplete="off" style="margin-bottom:6px;" />
+            <input type="text" id="kata-nazwah-2" placeholder="Kata kedua..." autocomplete="off" style="margin-bottom:6px;" />
+            <input type="text" id="kata-nazwah-3" placeholder="Kata ketiga..." autocomplete="off" style="margin-bottom:10px;" />
+            <button class="btn" onclick="cekNazwah()">Cek Jawaban</button>
+            <div style="width:100%;margin:14px 0;">
+              <div style="background:#f8b0d8;height:18px;border-radius:8px;overflow:hidden;">
+                <div id="progress-bar" style="background:#e75480;height:18px;width:0%;transition:width 0.4s;"></div>
+              </div>
+              <div id="progress-text" style="text-align:center;font-weight:bold;color:#e75480;margin-top:4px;">0%</div>
+            </div>
+            <div id="nazwah-message" class="sweet"></div>
+          </div>
+          <div class="slide-nav">
+            <button class="btn" id="prevTebak2">⬅ Sebelumnya</button>
+            <button class="btn" id="nextTebak2">Selanjutnya ➡</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Slide 5: Kata-kata Manis (Tombol Buka) -->
+      <div class="swiper-slide">
+        <div class="main-card">
+          <h2 style="font-size: 20px;">Buat Kamu yang Tersayang <span class="emoji-heartbeat">💖</span></h2>
+          <p class="sweet" id="pesan-singkat">
+            Makasih udah main game ini ya!<br>
+            Aku mau kasih kamu sebuah pesan spesial.<br>
+            <span class="emoji-bounce" style="font-size:2em;">🎁</span><br>
+            <button class="btn" id="bukaPesanBtn" style="margin-top:18px; font-size:1.1em; animation: pulse 1.2s infinite;">Buka Pesan 💌</button>
+          </p>
+          <div class="slide-nav">
+            <button class="btn" id="prevPesan">⬅ Sebelumnya</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 6: Pesan Panjang & Animasi Lucu -->
+      <div class="swiper-slide">
+        <div class="main-card" style="position:relative;">
+          <div id="animasi-lucu" style="text-align:center; margin-bottom:12px;">
+            <span class="emoji-bounce" style="font-size:2.5em;">🐼</span>
+            <span class="emoji-spin" style="font-size:2.5em;">🌸</span>
+            <img src="https://feeldreams.github.io/pusn.gif" alt="Cute" style="width:90px; animation: bounce 1.2s infinite;">
+            <span class="emoji-heartbeat" style="font-size:2.5em;">💗</span>
+          </div>
+          <h2 style="font-size: 20px;">Pesan Khusus Buat Kamu <span class="emoji-heartbeat">😘</span></h2>
+          <p class="sweet" style="font-size:1.05em;">
+            <b>My girl, My sweetie, Nazwah Sayang,</b><br><br>
+            I just want to say sorry, for real. I know sometimes I make you feel not safe, and I didn’t mean to do that. I know I’m not really good at telling you right away when something’s wrong with me, and maybe that makes you feel left out or confused. I’m sorry for making you overthink because of that.<br><br>
+            Sometimes I just keep things to myself, not because I don’t trust you, but maybe because I’m scared or don’t know how to say it. But I’m trying to learn, so you can feel safe with me, so you know that you’re important for me, and you matter.<br><br>
+            I don’t want to make you feel worried or tired because of me. I just want you to feel calm, to feel like you’re not alone, to feel like you can trust me too.<br><br>
+            I’m sorry if I’ve been slow to tell you things, or if I made you feel like I’m hiding something when I’m not. I will try to be better, for you, for us.<br><br>
+            Thank you for still staying, even when I make mistakes like this. I Love You!💗<br><br>
+            <i>— Dari seseorang yang selalu mikirin kamu (Aldi)💌</i>
+          </p>
+          <div class="slide-nav">
+            <button class="btn" id="prevAkhir">⬅ Sebelumnya</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script>
+    // Swiper init
+    var swiper = new Swiper(".mySwiper", {
+      effect: "slide",
+      allowTouchMove: false,
+    });
+
+    // --- MEMORY GAME ---
+    const emojis = ["🌹","🌹","❤️","❤️","🥳","🥳","💖","💖","🤍","🤍","😍","😍","🥰","🥰","😎","😎"];
+    let shuffled = emojis.slice().sort(() => Math.random() - 0.5);
+    let board = document.getElementById('memory-board');
+    let memoryMessage = document.getElementById('memory-message');
+    let flipped = [], matched = [];
+    shuffled.forEach((emoji, i) => {
+      let card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.index = i;
+      card.onclick = () => flipCard(card, emoji, i);
+      board.appendChild(card);
+    });
+    function flipCard(card, emoji, idx) {
+      if (flipped.length < 2 && !card.classList.contains('flipped') && !matched.includes(idx)) {
+        card.textContent = emoji;
+        card.classList.add('flipped');
+        flipped.push({card, emoji, idx});
+        if (flipped.length === 2) {
+          setTimeout(() => {
+            if (flipped[0].emoji === flipped[1].emoji) {
+              matched.push(flipped[0].idx, flipped[1].idx);
+              flipped[0].card.classList.add('matched');
+              flipped[1].card.classList.add('matched');
+              if (matched.length === emojis.length) {
+                memoryMessage.innerHTML = "Kamu hebat banget! 🥳<br>Semakin cinta deh sama kamu! <span class='emoji-heartbeat'>💗</span>";
+                setTimeout(()=>swiper.slideNext(), 2000);
+              }
+            } else {
+              flipped[0].card.textContent = '';
+              flipped[1].card.textContent = '';
+              flipped[0].card.classList.remove('flipped');
+              flipped[1].card.classList.remove('flipped');
+            }
+            flipped = [];
+          }, 700);
+        }
+      }
+    }
+
+    // --- TEBAK KATA GAME ---
+    const kataRahasia = [
+      { petunjuk: "Aku selalu bilang ini ke kamu tiap malam 🌙", jawaban: "selamat tidur" },
+      { petunjuk: "Tiga kata yang paling sering aku ucapin ke kamu 💌", jawaban: "aku sayang kamu" },
+      { petunjuk: "Kata yang bikin kamu senyum-senyum sendiri 😘", jawaban: "nazwah sayang" }
+    ];
+    let kataIndex = Math.floor(Math.random() * kataRahasia.length);
+    document.getElementById('kata-petunjuk').textContent = kataRahasia[kataIndex].petunjuk;
+    function cekJawaban() {
+      let input = document.getElementById('kata-jawaban').value.trim().toLowerCase();
+      let msg = document.getElementById('kata-message');
+      if (input === kataRahasia[kataIndex].jawaban) {
+        msg.innerHTML = "Bener Banget si!, kamu emang ngertiin bgt aku si! <span class='emoji-bounce'>🥰</span>";
+        setTimeout(()=>swiper.slideNext(), 2000);
+      } else {
+        msg.innerHTML = "Hmm, coba lagi ya sayang! <span class='emoji-bounce'>🤭</span>";
+      }
+    }
+
+    // --- TEBAK KATA NAZWAH ---
+    const kataNazwahJawaban = [
+      ["cantik", "manis", "baik", "perhatian", "penyayang", "pintar"],
+      ["cantik", "manis", "baik", "perhatian", "penyayang", "pintar"],
+      ["cantik", "manis", "baik", "perhatian", "penyayang", "pintar"]
+    ];
+    function cekNazwah() {
+      let benar = 0;
+      let inputs = [
+        document.getElementById('kata-nazwah-1').value.trim().toLowerCase(),
+        document.getElementById('kata-nazwah-2').value.trim().toLowerCase(),
+        document.getElementById('kata-nazwah-3').value.trim().toLowerCase()
+      ];
+      let sudah = [];
+      for(let i=0;i<3;i++) {
+        if (
+          kataNazwahJawaban[i].includes(inputs[i]) &&
+          !sudah.includes(inputs[i]) &&
+          inputs[i] !== ""
+        ) {
+          benar++;
+          sudah.push(inputs[i]);
+        }
+      }
+      // Progress bar & text
+      let percent = Math.round((benar/3)*100);
+      document.getElementById('progress-bar').style.width = percent+"%";
+      document.getElementById('progress-text').textContent = percent+"%";
+      let msg = document.getElementById('nazwah-message');
+      if(benar === 3) {
+        msg.innerHTML = "Kamu tahu banget Nazwah! <span class='emoji-bounce'>🥰</span><br>Lanjut yuk~";
+        setTimeout(()=>swiper.slideNext(), 1500);
+      } else {
+        msg.innerHTML = "Masih ada yang kurang tepat nih, coba lagi ya! <span class='emoji-bounce'>🤔</span>";
+      }
+    }
+
+    // --- Navigasi Button per Slide ---
+    document.addEventListener('DOMContentLoaded', function() {
+      // Slide 1
+      var nextAwal = document.getElementById('nextAwal');
+      if(nextAwal){
+        nextAwal.onclick = function() {
+          swiper.slideNext();
+        }
+      }
+      // Slide 2
+      var prevMemory = document.getElementById('prevMemory');
+      var nextMemory = document.getElementById('nextMemory');
+      if(prevMemory) prevMemory.onclick = () => swiper.slidePrev();
+      if(nextMemory) nextMemory.onclick = () => swiper.slideNext();
+      // Slide 3
+      var prevTebak1 = document.getElementById('prevTebak1');
+      var nextTebak1 = document.getElementById('nextTebak1');
+      if(prevTebak1) prevTebak1.onclick = () => swiper.slidePrev();
+      if(nextTebak1) nextTebak1.onclick = () => swiper.slideNext();
+      // Slide 4
+      var prevTebak2 = document.getElementById('prevTebak2');
+      var nextTebak2 = document.getElementById('nextTebak2');
+      if(prevTebak2) prevTebak2.onclick = () => swiper.slidePrev();
+      if(nextTebak2) nextTebak2.onclick = () => swiper.slideNext();
+      // Slide 5
+      var prevPesan = document.getElementById('prevPesan');
+      if(prevPesan) prevPesan.onclick = () => swiper.slidePrev();
+      // Slide 6
+      var prevAkhir = document.getElementById('prevAkhir');
+      if(prevAkhir) prevAkhir.onclick = () => swiper.slidePrev();
+
+      // Ambil elemen audio
+      var music1 = document.getElementById('music1');
+      var music2 = document.getElementById('music2');
+      var mainMusic = document.getElementById('linkmp3');
+
+      // Set volume sesuai permintaan
+      if(music1) music1.volume = 1.0;    // 100%
+      if(music2) music2.volume = 0.2;    // 50%
+
+      // Tombol buka pesan
+      var bukaBtn = document.getElementById('bukaPesanBtn');
+      if(bukaBtn){
+        bukaBtn.onclick = function() {
+          bukaBtn.disabled = true;
+          bukaBtn.textContent = "Membuka...";
+          bukaBtn.style.opacity = "0.7";
+          // Pause musik utama, play music1 & music2 bersamaan
+          if(mainMusic) mainMusic.pause();
+          if(music1) {
+            music1.currentTime = 0;
+            music1.play();
+          }
+          if(music2) {
+            music2.currentTime = 0;
+            music2.play();
+          }
+          setTimeout(function(){
+            swiper.slideNext();
+          }, 1200);
+        }
+      }
+
+      // Play music1 & music2 bersamaan saat masuk ke slide pesan panjang (slide ke-6, index 5)
+      swiper.on('slideChange', function() {
+        if(swiper.activeIndex === 5) {
+          if(mainMusic) mainMusic.pause();
+          if(music1) {
+            music1.currentTime = 0;
+            music1.play();
+          }
+          if(music2) {
+            music2.currentTime = 0;
+            music2.play();
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
